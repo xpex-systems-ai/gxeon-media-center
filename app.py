@@ -211,6 +211,8 @@ if AUTH_ENABLED:
         "/api/auth/integrations/presets",
         "/api/health",
         "/api/version",
+        "/",
+        "/roadmap",
         "/login",
     }
     AUTH_EXEMPT_PREFIXES = ["/static"]
@@ -799,7 +801,7 @@ def _serve_html_with_nonce(request: Request, file_path: str) -> HTMLResponse:
     html = html.replace("{{CSP_NONCE}}", nonce)
     return HTMLResponse(html)
 
-@app.get("/")
+@app.get("/workspace")
 async def serve_index(request: Request):
     static_path = abs_join(BASE_DIR, "static/index.html")
     if os.path.exists(static_path):
@@ -808,6 +810,14 @@ async def serve_index(request: Request):
     if os.path.exists(root_path):
         return _serve_html_with_nonce(request, root_path)
     raise HTTPException(404, "index.html not found")
+
+@app.get("/")
+async def serve_gxeon_shell(request: Request):
+    return _serve_html_with_nonce(request, abs_join(BASE_DIR, "static/gxeon.html"))
+
+@app.get("/roadmap")
+async def serve_gxeon_roadmap(request: Request):
+    return _serve_html_with_nonce(request, abs_join(BASE_DIR, "static/gxeon.html"))
 
 @app.get("/notes")
 async def serve_notes(request: Request):

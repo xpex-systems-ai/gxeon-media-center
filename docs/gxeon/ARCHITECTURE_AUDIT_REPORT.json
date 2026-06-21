@@ -1,0 +1,31 @@
+{
+  "mission": "PANDORA-001_ARCHITECTURE_SHELL_AND_GXEON_MEDIA_CENTER_FOUNDATION",
+  "product": "GXEON Media Center",
+  "public_identity_created": true,
+  "protected_workspace_preserved": true,
+  "runtime": {
+    "container": "Dockerfile",
+    "entrypoint": "/usr/local/bin/entrypoint.sh",
+    "command": "uvicorn app:app --host 0.0.0.0 --port 7000",
+    "port": 7000,
+    "persistence": ["/app/data", "/app/logs"]
+  },
+  "route_boundaries": {
+    "public": ["/", "/roadmap"],
+    "protected_workspace": ["/workspace", "/notes", "/calendar", "/cookbook", "/email", "/memory", "/gallery", "/tasks", "/library", "/api/*"]
+  },
+  "degraded_or_optional_services": [
+    "ChromaDB/vector memory when dependencies or persistence are unavailable",
+    "Browser MCP when Node/browser tooling is unavailable or unconfigured",
+    "External providers when credentials are absent"
+  ],
+  "safety_boundaries": {
+    "external_apis_connected": false,
+    "stripe_added": false,
+    "supabase_added": false,
+    "social_posting_added": false,
+    "auth_disabled_for_protected_routes": false,
+    "secrets_committed": false
+  },
+  "next_mission": "PANDORA-002_OPERATOR_COMMAND_DECK"
+}
