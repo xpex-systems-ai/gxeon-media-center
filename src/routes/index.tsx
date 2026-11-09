@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { YouTubeEmbed } from "@/components/YouTubeEmbed";
+import { searchSambaYoutube } from "@/lib/search-samba-youtube";
 
 // Adicione aqui apenas URLs/IDs reais de vídeos autorizados pelo grupo.
 const YOUTUBE_VIDEOS: { url: string; title: string }[] = [];
@@ -154,66 +155,77 @@ function PwaInstallButton({ large = false }: { large?: boolean }) {
 
 function SambaYoutubeLibrary() {
   const [genre, setGenre] = useState<"todos" | "samba" | "pagode">("todos");
-  const [artist, setArtist] = useState("todos");
   const [query, setQuery] = useState("");
-  const [onlyBrasilia, setOnlyBrasilia] = useState(false);
-  const artists = [...new Set(SAMBA_YOUTUBE.map((v) => v.artist))].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  const normalize = (value: string) => value.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("pt-BR");
-  const q = normalize(query.trim());
-  const videos = SAMBA_YOUTUBE.filter((v) =>
-    (genre === "todos" || v.genre === genre) &&
-    (artist === "todos" || v.artist === artist) &&
-    (!onlyBrasilia || v.city === "Brasília") &&
-    (!q || normalize(`${v.title} ${v.artist} ${v.genre} ${v.city ?? ""}`).includes(q))
-  );
+  const [submitted, setSubmitted] = useState("");
+  const [items, setItems] = useState<Array<{ id: string; title: string; artist: string; thumbnail: string; genre: "samba" | "pagode" }>>([]);
+  const [nextPageToken, setNextPageToken] = useState<string | undefined>();
+  const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [configured, setConfigured] = useState<boolean | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    setLoading(true);
+    setItems([]);
+    setSelectedId(null);
+    setNextPageToken(undefined);
+    searchSambaYoutube({ data: { query: submitted, genre } })
+      .then((res) => { if (!live) return; setItems(res.videos); setNextPageToken(res.nextPageToken); setNotice(res.notice ?? ""); setConfigured(res.configured); })
+      .catch(() => { if (live) setNotice("Não foi possível buscar vídeos agora. Tente novamente."); })
+      .finally(() => { if (live) setLoading(false); });
+    return () => { live = false; };
+  }, [submitted, genre]);
+  const loadMore = async () => {
+    if (!nextPageToken || loading) return;
+    setLoading(true);
+    try {
+      const result = await searchSambaYoutube({ data: { query: submitted, genre, pageToken: nextPageToken } });
+      setItems((prev) => [...prev, ...result.videos.filter((v) => !prev.some((old) => old.id === v.id))]);
+      setNextPageToken(result.nextPageToken);
+      setNotice(result.notice ?? "");
+    } catch { setNotice("Não foi possível carregar mais vídeos."); }
+    finally { setLoading(false); }
+  };
   return <div className="mt-8">
-    <div className="grid gap-3 rounded-lg border border-brand/30 bg-card p-5 md:grid-cols-[1fr_auto]">
+    <form className="grid gap-3 rounded-lg border border-brand/30 bg-card p-5 md:grid-cols-[1fr_auto]" onSubmit={(e) => { e.preventDefault(); setSubmitted(query.trim()); }}>
       <label className="block">
-        <span className="mb-2 block text-xs font-semibold uppercase tracking-widest text-brand">Buscar música ou artista</span>
-        <input className="field" type="search" placeholder="Ex.: Revelação, Menos é Mais, Sinais..." value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Buscar vídeos de samba e pagode" />
+        <span className="mb-2 block text-xs font-semibold uppercase tracking-widest text-brand">Buscar samba, pagode, música ou artista no YouTube</span>
+        <input className="field" type="search" maxLength={100} placeholder="Ex.: pagode ao vivo, Ferrugem, samba de raiz..." value={query} onChange={(e) => setQuery(e.target.value)} />
       </label>
-      <div className="flex items-end gap-2" aria-label="Filtrar estilo musical">
+      <button className="btn-brand self-end" type="submit">🔎 Buscar vídeos</button>
+      <div className="flex flex-wrap gap-2 md:col-span-2" aria-label="Filtrar gênero">
         {(["todos", "samba", "pagode"] as const).map((option) =>
           <button key={option} type="button" aria-pressed={genre === option} onClick={() => setGenre(option)}
-            className={genre === option ? "btn-brand !px-3 !py-3 text-xs" : "btn-outline-brand !px-3 !py-3 text-xs"}>
-            {option === "todos" ? "Todos" : option === "samba" ? "Samba" : "Pagode"}
-          </button>
-        )}
+            className={genre === option ? "btn-brand !px-4 !py-2 text-xs" : "btn-outline-brand !px-4 !py-2 text-xs"}>
+            {option === "todos" ? "Samba + Pagode" : option === "samba" ? "Samba" : "Pagode"}
+          </button>)}
       </div>
-      <label className="block text-xs font-semibold uppercase tracking-widest text-brand">
-        Artista
-        <select className="field mt-2" value={artist} onChange={(e) => setArtist(e.target.value)}>
-          <option value="todos">Todos os artistas</option>
-          {artists.map((name) => <option key={name} value={name}>{name}</option>)}
-        </select>
-      </label>
-      <div className="flex items-end justify-between gap-4">
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          <input type="checkbox" checked={onlyBrasilia} onChange={(e) => setOnlyBrasilia(e.target.checked)} />
-          Gravado em Brasília
-        </label>
-        <button type="button" onClick={() => { setGenre("todos"); setArtist("todos"); setQuery(""); setOnlyBrasilia(false); }} className="text-xs text-brand underline">Limpar filtros</button>
-      </div>
-    </div>
-    <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-muted-foreground" role="status">{videos.length} {videos.length === 1 ? "vídeo encontrado" : "vídeos encontrados"} · catálogo selecionado de samba e pagode</p>
-      <span className="text-xs text-muted-foreground">Player oficial YouTube · sem copiar arquivos</span>
-    </div>
-    {videos.length ? <div className="mt-5 grid gap-6 md:grid-cols-2">
-      {videos.map((v) => <article key={v.url} className="overflow-hidden rounded-lg border border-brand/30 bg-card">
-        <YouTubeEmbed video={v.url} title={v.title} />
-        <div className="p-5">
-          <p className="eyebrow">{v.genre === "samba" ? "Samba" : "Pagode"} · {v.city ?? "Brasil"}</p>
-          <h3 className="mt-2 font-display text-xl">{v.title}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{v.artist} · canal do artista</p>
-          <a className="btn-outline-brand mt-4 !py-2 text-xs" target="_blank" rel="noopener noreferrer" href={v.url}>Abrir no YouTube ↗</a>
-        </div>
-      </article>)}
-    </div> : <div className="mt-6 rounded-lg border border-dashed border-brand/30 p-8 text-center">
-      <h3 className="text-xl">Nenhum vídeo corresponde aos filtros</h3>
-      <p className="mt-2 text-sm text-muted-foreground">Escolha outro estilo ou artista, ou limpe a busca. O catálogo é selecionado, não uma pesquisa irrestrita no YouTube.</p>
+    </form>
+    <p className="mt-5 text-sm text-muted-foreground" role="status" aria-live="polite">
+      {loading ? "Buscando vídeos no YouTube..." : configured === false ? "Busca automática aguardando ativação da API." : `${items.length} vídeos encontrados na busca musical`}
+    </p>
+    {notice && <p role="alert" className="mt-2 rounded-md border border-brand/30 bg-card p-3 text-sm">{notice}</p>}
+    {configured === false && <div className="mt-5 rounded-lg border border-brand/30 p-5">
+      <h3 className="text-lg font-bold">Samba e pagode selecionados</h3>
+      <p className="mt-2 text-sm text-muted-foreground">Enquanto a busca oficial do YouTube é configurada, assista aos vídeos da seleção inicial.</p>
+      <div className="mt-4 grid gap-5 md:grid-cols-2">{SAMBA_YOUTUBE.map((v) => <div key={v.url} className="overflow-hidden rounded-lg border border-brand/30"><YouTubeEmbed video={v.url} title={v.title}/><p className="p-3 text-sm">{v.artist} · {v.title}</p></div>)}</div>
     </div>}
-    <p className="mt-5 text-xs text-muted-foreground">Reprodução depende de o YouTube permitir a incorporação e de conexão à internet. Resultados limitados ao catálogo selecionado; pesquisa automática na plataforma exige integração da YouTube Data API.</p>
+    {items.length > 0 && <>
+      {selectedId && <div className="mt-5 overflow-hidden rounded-lg border border-brand/30 bg-card">
+        <div className="aspect-video"><iframe key={selectedId} className="h-full w-full" src={`https://www.youtube-nocookie.com/embed/${selectedId}?autoplay=1`} title="Player de samba e pagode do YouTube" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen /></div>
+      </div>}
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((v) => <article key={v.id} className="overflow-hidden rounded-lg border border-brand/30 bg-card">
+          <button type="button" className="block w-full text-left" onClick={() => {setSelectedId(v.id); document.getElementById("sambayoutube")?.scrollIntoView({behavior:"smooth"});}} aria-label={`Reproduzir ${v.title}`}>
+            {v.thumbnail ? <img src={v.thumbnail} alt="" loading="lazy" className="aspect-video w-full object-cover" /> : <div className="aspect-video bg-black" />}
+            <span className="block p-3 text-sm font-bold">{v.title}</span>
+          </button>
+          <div className="px-3 pb-3 text-xs text-muted-foreground">{v.artist} · {v.genre === "samba" ? "Samba" : "Pagode"} · <a href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer" className="underline">YouTube ↗</a></div>
+        </article>)}
+      </div>
+      {nextPageToken && <button type="button" disabled={loading} onClick={loadMore} className="btn-outline-brand mt-6">{loading ? "Carregando..." : "Carregar mais vídeos"}</button>}
+    </>}
+    <p className="mt-5 text-xs text-muted-foreground">Busca via API oficial, filtros de relevância musical e reprodução no player oficial do YouTube. A classificação por estilo é aproximada; os vídeos permanecem hospedados no YouTube e sujeitos às restrições dos titulares.</p>
   </div>;
 }
 
