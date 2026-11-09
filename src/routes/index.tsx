@@ -45,7 +45,7 @@ export const Route = createFileRoute("/")({
 });
 
 const nav = [
-  ["sobre", "Sobre"], ["shows", "Shows"], ["repertorio", "Repertório"], ["acao", "Em ação"], ["portfolio", "Portfólio"], ["proposta", "Para casas"],
+  ["sobre", "Sobre"], ["shows", "Shows"], ["repertorio", "Repertório"], ["acao", "Em ação"], ["portfolio", "Portfólio"], ["presenca", "Redes sociais"], ["proposta", "Para casas"],
   ["agenda", "Agenda"], ["kit", "Press kit"], ["orcamento", "Orçamento"],
 ] as const;
 
@@ -180,6 +180,27 @@ function Index() {
             ))}
           </div>
           <a href={IG} target="_blank" rel="noopener noreferrer" className="btn-outline-brand mt-8">Ver vídeos no Instagram</a>
+        </Section>
+
+        <Section id="presenca" eyebrow="Presença digital" title="O pagode continua nas redes">
+          <div className="grid items-center gap-10 rounded-lg border border-brand/40 bg-card p-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:p-10">
+            <div className="mx-auto w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-[#0b0e12] shadow-2xl">
+              <a href={IG} target="_blank" rel="noopener noreferrer" aria-label="Abrir Instagram do Surra de Pagode">
+                <img src="/instagram-surradepagode.webp" alt="Captura real do Instagram @surradepagode mostrando perfil e publicações musicais, imagem ilustrativa do perfil em novembro de 2026" loading="lazy" width="172" height="290" className="block w-full" />
+              </a>
+              <p className="px-4 py-3 text-center text-xs text-muted-foreground">Captura do perfil em 09/11/2026. Dados sujeitos a mudanças.</p>
+            </div>
+            <div>
+              <p className="eyebrow">@surradepagode · Brasília, DF</p>
+              <h3 className="mt-4 font-display text-3xl md:text-4xl">Acompanhe o Surra de Pagode</h3>
+              <p className="mt-5 max-w-lg leading-relaxed text-muted-foreground">Veja os vídeos, as rodas de samba, bastidores e novidades divulgadas no perfil do grupo. Acompanhe as publicações diretamente na fonte oficial.</p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <a href={IG} target="_blank" rel="noopener noreferrer" className="btn-brand">Ver Instagram oficial ↗</a>
+                <a href={REEL} target="_blank" rel="noopener noreferrer" className="btn-outline-brand">Assistir Reel em destaque ↗</a>
+              </div>
+              <p className="mt-5 text-xs text-muted-foreground">Prévia comercial em desenvolvimento — aguardando aprovação da banda.</p>
+            </div>
+          </div>
         </Section>
 
         <Section id="proposta" eyebrow="Apoio operacional" title="Nossa proposta comercial para casas de show">
