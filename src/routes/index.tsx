@@ -3,10 +3,13 @@ import { YouTubeEmbed } from "@/components/YouTubeEmbed";
 
 // Adicione aqui apenas URLs/IDs reais de vídeos autorizados pelo grupo.
 const YOUTUBE_VIDEOS: { url: string; title: string }[] = [];
-// Curadoria exclusiva de samba, com vídeos identificados em canais oficiais dos artistas.
-const SAMBA_YOUTUBE: { url: string; title: string; artist: string; genre: "samba" }[] = [
-  { url: "https://www.youtube.com/watch?v=xV8oWY60eEs", title: "Virou Religião / Poder de Sedução / Só Pra Ver Você Sambar — Ao Vivo", artist: "Grupo Revelação", genre: "samba" },
-  { url: "https://www.youtube.com/watch?v=ZZSO-PR6V6k", title: "Revelação 30 Anos — Vol. 1 (Ao Vivo)", artist: "Grupo Revelação", genre: "samba" },
+// Catálogo selecionado: apenas samba e pagode, com URLs verificadas em canais dos artistas.
+type SambaVideo = { url: string; title: string; artist: string; genre: "samba" | "pagode"; city?: string };
+const SAMBA_YOUTUBE: SambaVideo[] = [
+  { url: "https://www.youtube.com/watch?v=xV8oWY60eEs", title: "Virou Religião / Poder de Sedução / Só Pra Ver Você Sambar (Ao Vivo)", artist: "Grupo Revelação", genre: "samba" },
+  { url: "https://www.youtube.com/watch?v=tKB-jiW-mBU", title: "Virou Religião / Poder de Sedução / Só Pra Ver Você Sambar — Áudio Oficial", artist: "Grupo Revelação", genre: "samba" },
+  { url: "https://www.youtube.com/watch?v=qV70vh3goD4", title: "Lapada Dela (No Churrasquinho de Brasília)", artist: "Grupo Menos é Mais", genre: "pagode", city: "Brasília" },
+  { url: "https://www.youtube.com/watch?v=0_Ib-23mKfw", title: "Sinais (Sorriso Maroto As Antigas)", artist: "Sorriso Maroto", genre: "pagode" },
 ];
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { z } from "zod";
@@ -148,6 +151,72 @@ function PwaInstallButton({ large = false }: { large?: boolean }) {
   </div>;
 }
 
+
+function SambaYoutubeLibrary() {
+  const [genre, setGenre] = useState<"todos" | "samba" | "pagode">("todos");
+  const [artist, setArtist] = useState("todos");
+  const [query, setQuery] = useState("");
+  const [onlyBrasilia, setOnlyBrasilia] = useState(false);
+  const artists = [...new Set(SAMBA_YOUTUBE.map((v) => v.artist))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const normalize = (value: string) => value.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("pt-BR");
+  const q = normalize(query.trim());
+  const videos = SAMBA_YOUTUBE.filter((v) =>
+    (genre === "todos" || v.genre === genre) &&
+    (artist === "todos" || v.artist === artist) &&
+    (!onlyBrasilia || v.city === "Brasília") &&
+    (!q || normalize(`${v.title} ${v.artist} ${v.genre} ${v.city ?? ""}`).includes(q))
+  );
+  return <div className="mt-8">
+    <div className="grid gap-3 rounded-lg border border-brand/30 bg-card p-5 md:grid-cols-[1fr_auto]">
+      <label className="block">
+        <span className="mb-2 block text-xs font-semibold uppercase tracking-widest text-brand">Buscar música ou artista</span>
+        <input className="field" type="search" placeholder="Ex.: Revelação, Menos é Mais, Sinais..." value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Buscar vídeos de samba e pagode" />
+      </label>
+      <div className="flex items-end gap-2" aria-label="Filtrar estilo musical">
+        {(["todos", "samba", "pagode"] as const).map((option) =>
+          <button key={option} type="button" aria-pressed={genre === option} onClick={() => setGenre(option)}
+            className={genre === option ? "btn-brand !px-3 !py-3 text-xs" : "btn-outline-brand !px-3 !py-3 text-xs"}>
+            {option === "todos" ? "Todos" : option === "samba" ? "Samba" : "Pagode"}
+          </button>
+        )}
+      </div>
+      <label className="block text-xs font-semibold uppercase tracking-widest text-brand">
+        Artista
+        <select className="field mt-2" value={artist} onChange={(e) => setArtist(e.target.value)}>
+          <option value="todos">Todos os artistas</option>
+          {artists.map((name) => <option key={name} value={name}>{name}</option>)}
+        </select>
+      </label>
+      <div className="flex items-end justify-between gap-4">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <input type="checkbox" checked={onlyBrasilia} onChange={(e) => setOnlyBrasilia(e.target.checked)} />
+          Gravado em Brasília
+        </label>
+        <button type="button" onClick={() => { setGenre("todos"); setArtist("todos"); setQuery(""); setOnlyBrasilia(false); }} className="text-xs text-brand underline">Limpar filtros</button>
+      </div>
+    </div>
+    <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+      <p className="text-sm text-muted-foreground" role="status">{videos.length} {videos.length === 1 ? "vídeo encontrado" : "vídeos encontrados"} · catálogo selecionado de samba e pagode</p>
+      <span className="text-xs text-muted-foreground">Player oficial YouTube · sem copiar arquivos</span>
+    </div>
+    {videos.length ? <div className="mt-5 grid gap-6 md:grid-cols-2">
+      {videos.map((v) => <article key={v.url} className="overflow-hidden rounded-lg border border-brand/30 bg-card">
+        <YouTubeEmbed video={v.url} title={v.title} />
+        <div className="p-5">
+          <p className="eyebrow">{v.genre === "samba" ? "Samba" : "Pagode"} · {v.city ?? "Brasil"}</p>
+          <h3 className="mt-2 font-display text-xl">{v.title}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{v.artist} · canal do artista</p>
+          <a className="btn-outline-brand mt-4 !py-2 text-xs" target="_blank" rel="noopener noreferrer" href={v.url}>Abrir no YouTube ↗</a>
+        </div>
+      </article>)}
+    </div> : <div className="mt-6 rounded-lg border border-dashed border-brand/30 p-8 text-center">
+      <h3 className="text-xl">Nenhum vídeo corresponde aos filtros</h3>
+      <p className="mt-2 text-sm text-muted-foreground">Escolha outro estilo ou artista, ou limpe a busca. O catálogo é selecionado, não uma pesquisa irrestrita no YouTube.</p>
+    </div>}
+    <p className="mt-5 text-xs text-muted-foreground">Reprodução depende de o YouTube permitir a incorporação e de conexão à internet. Resultados limitados ao catálogo selecionado; pesquisa automática na plataforma exige integração da YouTube Data API.</p>
+  </div>;
+}
+
 function Index() {
   const [open, setOpen] = useState(false);
   return (
@@ -269,28 +338,15 @@ function Index() {
           <a href={IG} target="_blank" rel="noopener noreferrer" className="btn-outline-brand mt-8">Ver vídeos no Instagram</a>
         </Section>
 
-        <Section id="sambayoutube" eyebrow="Samba no YouTube · Seleção oficial" title="O samba também vive aqui">
+        <Section id="sambayoutube" eyebrow="Videoteca · YouTube oficial" title="Samba & Pagode — Assista aqui">
           <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
-            Assista a vídeos de samba selecionados de canais oficiais no YouTube, sem sair do site.
-            Esta seleção é uma vitrine cultural: os vídeos pertencem aos respectivos artistas
-            e não são apresentações do Surra de Pagode. A reprodução depende da autorização de incorporação de cada vídeo.
+            Videoteca com seleção exclusiva de samba e pagode, reproduzidos no player incorporado do YouTube.
+            Filtre por estilo, artista ou nome da música. Os vídeos são de terceiros e permanecem vinculados aos canais de origem.
           </p>
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
-            {SAMBA_YOUTUBE.map((v) => (
-              <article key={v.url} className="overflow-hidden rounded-lg border border-brand/30 bg-card">
-                <YouTubeEmbed video={v.url} title={v.title} />
-                <div className="p-5">
-                  <p className="eyebrow">Samba · Canal oficial</p>
-                  <h3 className="mt-2 font-display text-xl">{v.title}</h3>
-                  <p className="mt-2 text-xs text-muted-foreground">Artista: {v.artist} · Conteúdo de terceiro</p>
-                  <a href={v.url} target="_blank" rel="noopener noreferrer" className="btn-outline-brand mt-4 !py-2 text-xs">Assistir no YouTube oficial ↗</a>
-                </div>
-              </article>
-            ))}
-          </div>
+          <SambaYoutubeLibrary />
           <div className="mt-8 flex flex-wrap items-center gap-3 rounded border border-brand/20 bg-card p-5">
-            <p className="flex-1 text-sm text-muted-foreground">Tem um vídeo de samba do Surra de Pagode publicado no YouTube? Envie o link oficial para que ele seja destacado na galeria da banda.</p>
-            <a href={IG_DM} target="_blank" rel="noopener noreferrer" className="btn-brand !py-2 text-xs">Indicar vídeo pelo Instagram</a>
+            <p className="flex-1 text-sm text-muted-foreground">É do Surra de Pagode e tem um vídeo no YouTube? Envie o link oficial para entrar na seleção da banda.</p>
+            <a href={IG_DM} target="_blank" rel="noopener noreferrer" className="btn-brand !py-2 text-xs">Indicar vídeo</a>
           </div>
         </Section>
 
