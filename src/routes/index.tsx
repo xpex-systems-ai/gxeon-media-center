@@ -3,6 +3,11 @@ import { YouTubeEmbed } from "@/components/YouTubeEmbed";
 
 // Adicione aqui apenas URLs/IDs reais de vídeos autorizados pelo grupo.
 const YOUTUBE_VIDEOS: { url: string; title: string }[] = [];
+// Curadoria exclusiva de samba, com vídeos identificados em canais oficiais dos artistas.
+const SAMBA_YOUTUBE: { url: string; title: string; artist: string; genre: "samba" }[] = [
+  { url: "https://www.youtube.com/watch?v=xV8oWY60eEs", title: "Virou Religião / Poder de Sedução / Só Pra Ver Você Sambar — Ao Vivo", artist: "Grupo Revelação", genre: "samba" },
+  { url: "https://www.youtube.com/watch?v=ZZSO-PR6V6k", title: "Revelação 30 Anos — Vol. 1 (Ao Vivo)", artist: "Grupo Revelação", genre: "samba" },
+];
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { z } from "zod";
 import hero from "@/assets/hero-pandeiro.svg";
@@ -46,7 +51,7 @@ export const Route = createFileRoute("/")({
 });
 
 const nav = [
-  ["sobre", "Sobre"], ["shows", "Shows"], ["repertorio", "Repertório"], ["acao", "Em ação"], ["portfolio", "Portfólio"], ["presenca", "Redes sociais"], ["proposta", "Para casas"],
+  ["sobre", "Sobre"], ["shows", "Shows"], ["repertorio", "Repertório"], ["acao", "Em ação"], ["portfolio", "Portfólio"], ["sambayoutube", "Samba no YouTube"], ["presenca", "Redes sociais"], ["proposta", "Para casas"],
   ["agenda", "Agenda"], ["kit", "Press kit"], ["orcamento", "Orçamento"],
 ] as const;
 
@@ -262,6 +267,31 @@ function Index() {
             ))}
           </div>
           <a href={IG} target="_blank" rel="noopener noreferrer" className="btn-outline-brand mt-8">Ver vídeos no Instagram</a>
+        </Section>
+
+        <Section id="sambayoutube" eyebrow="Samba no YouTube · Seleção oficial" title="O samba também vive aqui">
+          <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
+            Assista a vídeos de samba selecionados de canais oficiais no YouTube, sem sair do site.
+            Esta seleção é uma vitrine cultural: os vídeos pertencem aos respectivos artistas
+            e não são apresentações do Surra de Pagode. A reprodução depende da autorização de incorporação de cada vídeo.
+          </p>
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            {SAMBA_YOUTUBE.map((v) => (
+              <article key={v.url} className="overflow-hidden rounded-lg border border-brand/30 bg-card">
+                <YouTubeEmbed video={v.url} title={v.title} />
+                <div className="p-5">
+                  <p className="eyebrow">Samba · Canal oficial</p>
+                  <h3 className="mt-2 font-display text-xl">{v.title}</h3>
+                  <p className="mt-2 text-xs text-muted-foreground">Artista: {v.artist} · Conteúdo de terceiro</p>
+                  <a href={v.url} target="_blank" rel="noopener noreferrer" className="btn-outline-brand mt-4 !py-2 text-xs">Assistir no YouTube oficial ↗</a>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap items-center gap-3 rounded border border-brand/20 bg-card p-5">
+            <p className="flex-1 text-sm text-muted-foreground">Tem um vídeo de samba do Surra de Pagode publicado no YouTube? Envie o link oficial para que ele seja destacado na galeria da banda.</p>
+            <a href={IG_DM} target="_blank" rel="noopener noreferrer" className="btn-brand !py-2 text-xs">Indicar vídeo pelo Instagram</a>
+          </div>
         </Section>
 
         <Section id="presenca" eyebrow="Presença digital" title="O pagode continua nas redes">
