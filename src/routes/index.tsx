@@ -69,7 +69,7 @@ function Index() {
       </div>
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-          <a href="#topo" className="font-display text-xl tracking-wide">Surra <span className="text-brand italic">de</span> Pagode</a>
+          <a href="#topo" className="logo-surra"><img src="/surra-logo.svg" alt="" /> <span>SURRA <span className="text-brand">DE</span> PAGODE</span></a>
           <nav aria-label="Principal" className="hidden gap-6 text-sm lg:flex">
             {nav.map(([id, l]) => <a key={id} href={`#${id}`} className="text-muted-foreground hover:text-brand">{l}</a>)}
             <Link to="/agenda" search={{ periodo: "hoje", regiao: "" }} className="font-semibold text-brand">Pagode hoje</Link>

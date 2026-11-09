@@ -42,21 +42,21 @@
   --card-foreground: oklch(0.98 0 0);
   --popover: oklch(0.2 0 0);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.56 0.23 27);
+  --primary: #ef1717;
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.24 0 0);
   --secondary-foreground: oklch(0.98 0 0);
   --muted: oklch(0.22 0 0);
   --muted-foreground: oklch(0.74 0 0);
-  --accent: oklch(0.56 0.23 27);
+  --accent: #ef1717;
   --accent-foreground: oklch(0.13 0 0);
-  --destructive: oklch(0.65 0.2 27);
+  --destructive: #ff3030;
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.6 0.23 27 / 22%);
-  --input: oklch(0.6 0.23 27 / 30%);
-  --ring: oklch(0.6 0.23 27);
+  --border: rgba(239,23,23,.22);
+  --input: rgba(239,23,23,.30);
+  --ring: #f52525;
   --cream: oklch(0.98 0 0);
-  --brand: oklch(0.6 0.23 27);
+  --brand: #f52525;
   --gradient-hero: linear-gradient(180deg, oklch(0.13 0 0 / 30%) 0%, oklch(0.13 0 0 / 85%) 70%, var(--background) 100%);
 }
 
@@ -84,7 +84,7 @@
 @utility btn-brand {
   display: inline-flex; align-items: center; justify-content: center; gap: .5rem; white-space: nowrap;
   background: var(--brand); color: var(--primary-foreground);
-  padding: .9rem 1.5rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; box-shadow: 0 10px 30px -10px oklch(0.6 0.23 27 / 60%); border-radius: var(--radius);
+  padding: .9rem 1.5rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; box-shadow: 0 10px 30px -10px rgba(239,23,23,.60); border-radius: var(--radius);
   transition: transform .2s, filter .2s;
   &:hover { filter: brightness(1.08); transform: translateY(-1px); }
 }
@@ -93,10 +93,14 @@
   border: 1px solid var(--brand); color: var(--cream);
   padding: .9rem 1.5rem; font-weight: 600; border-radius: var(--radius);
   transition: background .2s;
-  &:hover { background: oklch(0.6 0.23 27 / 12%); }
+  &:hover { background: rgba(239,23,23,.12); }
 }
 @utility field {
   width: 100%; background: var(--muted); border: 1px solid var(--input);
   padding: .75rem .9rem; border-radius: var(--radius); color: var(--foreground);
   &:focus { outline: none; border-color: var(--brand); }
 }
+/* Identidade Surra de Pagode: vermelho, branco e preto */
+:root { --brand: #f3151a; --primary:#f3151a; --ring:#f3151a; --border:rgba(243,21,26,.27); --input:rgba(243,21,26,.34); --gradient-hero: linear-gradient(90deg,rgba(8,9,12,.88),rgba(8,9,12,.48)),linear-gradient(0deg,#08090c,transparent 75%); }
+.logo-surra {display:inline-flex;align-items:center;gap:.65rem;font-family:Georgia,serif;font-weight:900;font-size:1.15rem;line-height:1;text-transform:uppercase;letter-spacing:-.03em}
+.logo-surra img {width:44px;height:44px;object-fit:contain}

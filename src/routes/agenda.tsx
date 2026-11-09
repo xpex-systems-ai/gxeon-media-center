@@ -46,7 +46,7 @@ function Agenda() {
       <div className="bg-secondary px-4 py-1.5 text-center text-[11px] text-muted-foreground">Prévia comercial em desenvolvimento — aguardando aprovação do grupo</div>
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3">
-          <Link to="/" className="font-display text-lg">Surra <span className="italic text-brand">de</span> Pagode</Link>
+          <Link to="/" className="logo-surra"><img src="/surra-logo.svg" alt="" /><span>SURRA <span className="text-brand">DE</span> PAGODE</span></Link>
           <Link to="/" hash="orcamento" className="btn-brand !px-3 !py-2 text-xs sm:text-sm">Contratar Surra de Pagode</Link>
         </div>
       </header>
