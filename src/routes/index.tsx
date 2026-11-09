@@ -3,7 +3,7 @@ import { YouTubeEmbed } from "@/components/YouTubeEmbed";
 
 // Adicione aqui apenas URLs/IDs reais de vídeos autorizados pelo grupo.
 const YOUTUBE_VIDEOS: { url: string; title: string }[] = [];
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { z } from "zod";
 import hero from "@/assets/hero-pandeiro.svg";
 import palco from "@/assets/palco-instrumentos.svg";
@@ -12,6 +12,7 @@ const IG = "https://www.instagram.com/surradepagode/";
 const IG_DM = "https://ig.me/m/surradepagode";
 const JBR = "https://jornaldebrasilia.com.br/viva/eventos/novos-projetos-fazem-as-segundas-perderem-a-fama-de-pior-dia-da-semana/";
 const REEL = "https://www.instagram.com/reel/DfVdwHJOp_n/";
+const EMBED_REEL = "https://www.instagram.com/reel/C4l6QCdPV-J/";
 const VIBE = "https://www.vibeindex.com.br/event/brasilia-df-tchau-e-benca-6-de-novembro-nov-07-2026";
 // Preencher somente após o grupo informar o WhatsApp comercial oficial (apenas dígitos, com DDI).
 const WHATSAPP_OFICIAL = "";
@@ -56,6 +57,52 @@ function Section({ id, eyebrow, title, children }: { id: string; eyebrow: string
       <h2 id={`${id}-t`} className="mt-3 max-w-3xl text-4xl leading-tight md:text-5xl">{title}</h2>
       <div className="mt-10">{children}</div>
     </section>
+  );
+}
+
+
+function InstagramReelEmbed() {
+  useEffect(() => {
+    const processEmbeds = () => {
+      const instagram = (window as Window & { instgrm?: { Embeds?: { process?: () => void } } }).instgrm;
+      instagram?.Embeds?.process?.();
+    };
+    const existing = document.querySelector('script[data-sdp-instagram-embed="true"]') as HTMLScriptElement | null;
+    if (existing) {
+      if ((window as Window & { instgrm?: unknown }).instgrm) processEmbeds();
+      else existing.addEventListener("load", processEmbeds, { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://www.instagram.com/embed.js";
+    script.async = true;
+    script.dataset.sdpInstagramEmbed = "true";
+    script.addEventListener("load", processEmbeds, { once: true });
+    document.body.appendChild(script);
+  }, []);
+
+  return (
+    <div className="flex min-w-0 flex-col items-center gap-3 overflow-hidden rounded-lg border border-brand/30 bg-card p-3">
+      <div className="w-full max-w-[540px]">
+        <blockquote
+          className="instagram-media"
+          data-instgrm-permalink={EMBED_REEL}
+          data-instgrm-version="14"
+          data-instgrm-captioned
+          style={{ background: "#fff", border: 0, borderRadius: 3, margin: "1px auto", minWidth: 0, width: "100%", maxWidth: 540, padding: 0 }}
+        >
+          <div style={{ padding: 24, textAlign: "center", color: "#161616" }}>
+            <p style={{ fontSize: 15, fontWeight: 700 }}>Surra de Pagode no Instagram</p>
+            <a href={EMBED_REEL} target="_blank" rel="noopener noreferrer" style={{ color: "#c91521", fontWeight: 700 }}>
+              Ver este Reel no Instagram
+            </a>
+          </div>
+        </blockquote>
+      </div>
+      <a href={EMBED_REEL} target="_blank" rel="noopener noreferrer" className="btn-outline-brand !px-3 !py-2 text-xs">
+        Abrir vídeo no Instagram ↗
+      </a>
+    </div>
   );
 }
 
@@ -159,14 +206,13 @@ function Index() {
               <span className="mt-2 font-display text-2xl">Vídeo em destaque · Surra de Pagode</span>
               <span className="mt-4 btn-brand self-start !py-2 text-sm">Assistir no Instagram ↗</span>
             </a>
-            {[2, 3].map((n) => (
-              <div key={n} role="img" aria-label={`Espaço para vídeo ${n}, em atualização`} className="flex aspect-[4/5] flex-col items-center justify-center border border-dashed bg-muted text-center">
-                <span className="eyebrow">Em atualização</span>
-                <span className="mt-2 text-xs text-muted-foreground">Aguardando vídeo autorizado pelo grupo</span>
-              </div>
-            ))}
+            <InstagramReelEmbed />
+            <div className="flex aspect-[4/5] flex-col items-center justify-center border border-dashed bg-muted text-center">
+              <span className="eyebrow">Mais vídeos em breve</span>
+              <span className="mt-2 text-xs text-muted-foreground">Acompanhe os novos lançamentos do Surra de Pagode</span>
+            </div>
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">Os vídeos abrem no perfil público do grupo no Instagram; nenhum conteúdo foi baixado ou reproduzido aqui.</p>
+          <p className="mt-4 text-xs text-muted-foreground">Este Reel é incorporado diretamente do Instagram oficial. Se o Instagram bloquear a reprodução no navegador, utilize o botão para abrir a publicação original.</p>
         </Section>
 
         <Section id="portfolio" eyebrow="Portfólio e vídeos" title="Galeria em atualização">
