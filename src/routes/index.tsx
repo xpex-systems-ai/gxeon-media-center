@@ -61,7 +61,7 @@ function Section({ id, eyebrow, title, children }: { id: string; eyebrow: string
 }
 
 
-function InstagramReelEmbed() {
+function InstagramReelEmbed({ url, label }: { url: string; label: string }) {
   useEffect(() => {
     const processEmbeds = () => {
       const instagram = (window as Window & { instgrm?: { Embeds?: { process?: () => void } } }).instgrm;
@@ -86,20 +86,20 @@ function InstagramReelEmbed() {
       <div className="w-full max-w-[540px]">
         <blockquote
           className="instagram-media"
-          data-instgrm-permalink={EMBED_REEL}
+          data-instgrm-permalink={url}
           data-instgrm-version="14"
           data-instgrm-captioned
           style={{ background: "#fff", border: 0, borderRadius: 3, margin: "1px auto", minWidth: 0, width: "100%", maxWidth: 540, padding: 0 }}
         >
           <div style={{ padding: 24, textAlign: "center", color: "#161616" }}>
-            <p style={{ fontSize: 15, fontWeight: 700 }}>Surra de Pagode no Instagram</p>
-            <a href={EMBED_REEL} target="_blank" rel="noopener noreferrer" style={{ color: "#c91521", fontWeight: 700 }}>
+            <p style={{ fontSize: 15, fontWeight: 700 }}>{label}</p>
+            <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: "#c91521", fontWeight: 700 }}>
               Ver este Reel no Instagram
             </a>
           </div>
         </blockquote>
       </div>
-      <a href={EMBED_REEL} target="_blank" rel="noopener noreferrer" className="btn-outline-brand !px-3 !py-2 text-xs">
+      <a href={url} target="_blank" rel="noopener noreferrer" className="btn-outline-brand !px-3 !py-2 text-xs">
         Abrir vídeo no Instagram ↗
       </a>
     </div>
@@ -244,19 +244,11 @@ function Index() {
         </Section>
 
         <Section id="acao" eyebrow="Vídeos públicos no Instagram" title="Veja a banda em ação">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            <a href={REEL} target="_blank" rel="noopener noreferrer" className="group flex aspect-[4/5] flex-col justify-end border-2 border-brand bg-card p-6 transition hover:bg-muted">
-              <span className="eyebrow">Reel no Instagram</span>
-              <span className="mt-2 font-display text-2xl">Vídeo em destaque · Surra de Pagode</span>
-              <span className="mt-4 btn-brand self-start !py-2 text-sm">Assistir no Instagram ↗</span>
-            </a>
-            <InstagramReelEmbed />
-            <div className="flex aspect-[4/5] flex-col items-center justify-center border border-dashed bg-muted text-center">
-              <span className="eyebrow">Mais vídeos em breve</span>
-              <span className="mt-2 text-xs text-muted-foreground">Acompanhe os novos lançamentos do Surra de Pagode</span>
-            </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            <InstagramReelEmbed url={REEL} label="Surra de Pagode — Reel em destaque" />
+            <InstagramReelEmbed url={EMBED_REEL} label="Surra de Pagode — Apresentação" />
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">Este Reel é incorporado diretamente do Instagram oficial. Se o Instagram bloquear a reprodução no navegador, utilize o botão para abrir a publicação original.</p>
+          <p className="mt-4 text-xs text-muted-foreground">Os dois vídeos são incorporados do Instagram oficial por meio do player autorizado pela plataforma. Se a reprodução for bloqueada no navegador, use os botões para abrir as publicações originais.</p>
         </Section>
 
         <Section id="portfolio" eyebrow="Portfólio e vídeos" title="Galeria em atualização">
