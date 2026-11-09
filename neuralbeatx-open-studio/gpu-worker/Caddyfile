@@ -1,9 +1,0 @@
-# Automatic HTTPS requires a DNS A record pointing NBX_GPU_DOMAIN to the server.
-# Do NOT remove ACESTEP_API_KEY protection on upstream inference.
-{$NBX_GPU_DOMAIN} {
-    encode gzip zstd
-    request_body {
-        max_size 100MB
-    }
-    reverse_proxy acestep:8001
-}
