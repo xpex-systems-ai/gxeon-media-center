@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { YouTubeEmbed } from "@/components/YouTubeEmbed";
+import { YouTubeEmbed, parseYouTubeId } from "@/components/YouTubeEmbed";
 import { searchSambaYoutube } from "@/lib/search-samba-youtube";
 
 // Adicione aqui apenas URLs/IDs reais de vídeos autorizados pelo grupo.
@@ -163,6 +163,12 @@ function SambaYoutubeLibrary() {
   const [notice, setNotice] = useState("");
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [manualUrl, setManualUrl] = useState("");
+  const [manualError, setManualError] = useState("");
+  const normalize = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const terms = normalize(submitted).trim().split(/\s+/).filter(Boolean);
+  const filteredLocal = SAMBA_YOUTUBE.filter(v => (genre === "todos" || v.genre === genre) && terms.every(t => normalize(v.title + " " + v.artist + " " + v.genre + " " + (v.city ?? "")).includes(t)));
+  const youtubeSearchUrl = "https://www.youtube.com/results?search_query=" + encodeURIComponent((genre === "todos" ? "samba pagode" : genre) + " " + submitted);
   useEffect(() => {
     let live = true;
     setLoading(true);
@@ -171,7 +177,7 @@ function SambaYoutubeLibrary() {
     setNextPageToken(undefined);
     searchSambaYoutube({ data: { query: submitted, genre } })
       .then((res) => { if (!live) return; setItems(res.videos); setNextPageToken(res.nextPageToken); setNotice(res.notice ?? ""); setConfigured(res.configured); })
-      .catch(() => { if (live) setNotice("Não foi possível buscar vídeos agora. Tente novamente."); })
+      .catch(() => { if (live) { setConfigured(false); setNotice("Busca automática indisponível; catálogo local disponível."); } })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
   }, [submitted, genre]);
@@ -189,7 +195,7 @@ function SambaYoutubeLibrary() {
   return <div className="mt-8">
     <form className="grid gap-3 rounded-lg border border-brand/30 bg-card p-5 md:grid-cols-[1fr_auto]" onSubmit={(e) => { e.preventDefault(); setSubmitted(query.trim()); }}>
       <label className="block">
-        <span className="mb-2 block text-xs font-semibold uppercase tracking-widest text-brand">Buscar samba, pagode, música ou artista no YouTube</span>
+        <span className="mb-2 block text-xs font-semibold uppercase tracking-widest text-brand">Buscar samba, pagode, música ou artista</span>
         <input className="field" type="search" maxLength={100} placeholder="Ex.: pagode ao vivo, Ferrugem, samba de raiz..." value={query} onChange={(e) => setQuery(e.target.value)} />
       </label>
       <button className="btn-brand self-end" type="submit">🔎 Buscar vídeos</button>
@@ -202,13 +208,33 @@ function SambaYoutubeLibrary() {
       </div>
     </form>
     <p className="mt-5 text-sm text-muted-foreground" role="status" aria-live="polite">
-      {loading ? "Buscando vídeos no YouTube..." : configured === false ? "Busca automática aguardando ativação da API." : `${items.length} vídeos encontrados na busca musical`}
+      {loading ? "Buscando vídeos no YouTube..." : configured === false ? "Busca no catálogo selecionado sem API." : `${items.length} vídeos encontrados na busca musical`}
     </p>
     {notice && <p role="alert" className="mt-2 rounded-md border border-brand/30 bg-card p-3 text-sm">{notice}</p>}
-    {configured === false && <div className="mt-5 rounded-lg border border-brand/30 p-5">
-      <h3 className="text-lg font-bold">Samba e pagode selecionados</h3>
-      <p className="mt-2 text-sm text-muted-foreground">Enquanto a busca oficial do YouTube é configurada, assista aos vídeos da seleção inicial.</p>
-      <div className="mt-4 grid gap-5 md:grid-cols-2">{SAMBA_YOUTUBE.map((v) => <div key={v.url} className="overflow-hidden rounded-lg border border-brand/30"><YouTubeEmbed video={v.url} title={v.title}/><p className="p-3 text-sm">{v.artist} · {v.title}</p></div>)}</div>
+    {configured === false && <div className="mt-5 rounded-lg border border-brand/30 bg-card p-5">
+      <h3 className="text-lg font-bold">Samba e pagode — funciona sem API</h3>
+      <p className="mt-2 text-sm text-muted-foreground">Busque por artista ou música nos vídeos selecionados. Para encontrar qualquer outro vídeo, use a pesquisa oficial e depois cole o link aqui no aplicativo.</p>
+      <a href={youtubeSearchUrl} target="_blank" rel="noopener noreferrer" className="btn-outline-brand mt-4 !py-2 text-sm">Pesquisar mais vídeos no YouTube ↗</a>
+      {filteredLocal.length > 0 ? <div className="mt-4 grid gap-5 md:grid-cols-2">{filteredLocal.map(v => <article key={v.url} className="overflow-hidden rounded-lg border border-brand/30">
+        <YouTubeEmbed video={v.url} title={v.title}/><p className="p-3 text-sm">{v.artist} · {v.title}</p>
+      </article>)}</div> : <p className="mt-5 text-sm text-muted-foreground">Nenhum vídeo na seleção com esses termos. Use a busca oficial do YouTube acima.</p>}
+    </div>}
+    <form className="mt-5 rounded-lg border border-brand/30 bg-card p-5" onSubmit={e => {
+      e.preventDefault();
+      const id = parseYouTubeId(manualUrl);
+      if (!id) { setManualError("Cole um endereço de vídeo válido do YouTube."); return; }
+      setManualError("");
+      setSelectedId(id);
+    }}>
+      <label className="block text-sm font-semibold">Incorporar outro vídeo do YouTube por link
+        <input className="field mt-2" type="url" placeholder="https://www.youtube.com/watch?v=..." value={manualUrl} onChange={e => setManualUrl(e.target.value)} />
+      </label>
+      <button type="submit" className="btn-brand mt-3 !py-2 text-sm">▶ Assistir aqui no aplicativo</button>
+      {manualError && <p role="alert" className="mt-2 text-sm text-red-500">{manualError}</p>}
+      <p className="mt-2 text-xs text-muted-foreground">Links adicionados manualmente não passam pela curadoria de gênero. O player segue as permissões oficiais do YouTube.</p>
+    </form>}
+    {selectedId && configured === false && <div className="mt-5 overflow-hidden rounded-lg border border-brand/30 bg-card">
+      <div className="aspect-video"><iframe key={selectedId} className="h-full w-full" src={"https://www.youtube-nocookie.com/embed/" + selectedId + "?autoplay=1"} title="Vídeo YouTube incorporado" allow="autoplay; encrypted-media; picture-in-picture" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen /></div>
     </div>}
     {items.length > 0 && <>
       {selectedId && <div className="mt-5 overflow-hidden rounded-lg border border-brand/30 bg-card">
@@ -225,7 +251,7 @@ function SambaYoutubeLibrary() {
       </div>
       {nextPageToken && <button type="button" disabled={loading} onClick={loadMore} className="btn-outline-brand mt-6">{loading ? "Carregando..." : "Carregar mais vídeos"}</button>}
     </>}
-    <p className="mt-5 text-xs text-muted-foreground">Busca via API oficial, filtros de relevância musical e reprodução no player oficial do YouTube. A classificação por estilo é aproximada; os vídeos permanecem hospedados no YouTube e sujeitos às restrições dos titulares.</p>
+    <p className="mt-5 text-xs text-muted-foreground">Sem chave de API, a busca dentro do site consulta somente o catálogo selecionado. Para pesquisar todo o YouTube, utilize o link oficial e incorpore o vídeo pelo endereço. Os players respeitam as restrições do YouTube.</p>
   </div>;
 }
 
