@@ -106,6 +106,43 @@ function InstagramReelEmbed() {
   );
 }
 
+
+type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
+function PwaInstallButton({ large = false }: { large?: boolean }) {
+  const [evt, setEvt] = useState<InstallEvent | null>(null);
+  const [installed, setInstalled] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
+  useEffect(() => {
+    const standalone = window.matchMedia("(display-mode: standalone)").matches;
+    setInstalled(standalone);
+    const capture = (e: Event) => { e.preventDefault(); setEvt(e as InstallEvent); };
+    const onInstalled = () => { setInstalled(true); setEvt(null); };
+    window.addEventListener("beforeinstallprompt", capture);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", capture);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+  if (installed) return null;
+  const click = async () => {
+    if (evt) {
+      await evt.prompt();
+      try { if ((await evt.userChoice).outcome === "accepted") setEvt(null); } catch {}
+      return;
+    }
+    setShowInstructions((v) => !v);
+  };
+  return <div className={large ? "relative" : "relative hidden sm:block"}>
+    <button type="button" onClick={click} className={large ? "btn-brand" : "btn-outline-brand !px-3 !py-2 text-xs"}>📱 Instalar app</button>
+    {showInstructions && <div role="status" className="absolute right-0 top-full z-50 mt-2 w-72 rounded-md border border-brand/50 bg-background p-4 text-sm shadow-xl">
+      <strong>Instalar Surra de Pagode</strong>
+      <p className="mt-2 text-muted-foreground">No Android com Chrome: menu ⋮ → Adicionar à tela inicial ou Instalar app. No iPhone com Safari: Compartilhar → Adicionar à Tela de Início.</p>
+      <button type="button" className="mt-3 text-brand underline" onClick={() => setShowInstructions(false)}>Fechar</button>
+    </div>}
+  </div>;
+}
+
 function Index() {
   const [open, setOpen] = useState(false);
   return (
@@ -123,6 +160,7 @@ function Index() {
           </nav>
           <div className="flex items-center gap-2">
             <a href={IG} target="_blank" rel="noopener noreferrer" aria-label="Instagram @surradepagode" className="btn-outline-brand hidden !px-3 !py-2 text-sm sm:inline-flex">Instagram</a>
+            <PwaInstallButton />
             <a href="#orcamento" className="btn-brand !px-3 !py-2 text-xs sm:text-sm">Contratar show</a>
             <button className="btn-outline-brand !px-3 !py-2 text-sm lg:hidden" aria-expanded={open} aria-controls="menu-m" onClick={() => setOpen(!open)}>Menu</button>
           </div>
@@ -152,6 +190,12 @@ function Index() {
           </div>
         </section>
 
+        <section className="mx-auto max-w-6xl px-5 pt-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-brand/30 bg-card p-5">
+            <div><p className="eyebrow">Seu pagode na palma da mão</p><h2 className="mt-2 font-display text-2xl">Surra de Pagode App</h2><p className="mt-2 max-w-xl text-sm text-muted-foreground">Acompanhe os vídeos, descubra o pagode em Brasília e consulte shows pelo celular.</p></div>
+            <PwaInstallButton large />
+          </div>
+        </section>
         <Section id="sobre" eyebrow="Sobre / história" title="Um projeto de samba que ocupa a cidade.">
           <div className="grid gap-10 md:grid-cols-2">
             <div className="space-y-5 leading-relaxed text-muted-foreground">

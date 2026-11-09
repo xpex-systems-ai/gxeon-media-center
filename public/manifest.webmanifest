@@ -1,0 +1,48 @@
+{
+  "id": "/",
+  "name": "Surra de Pagode — Brasília",
+  "short_name": "Surra de Pagode",
+  "description": "Vídeos, agenda de pagode em Brasília e contratação de shows do Surra de Pagode.",
+  "lang": "pt-BR",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#0b0e12",
+  "theme_color": "#f3151a",
+  "categories": [
+    "music",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "/surra-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/surra-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pagode em Brasília",
+      "url": "/agenda?periodo=hoje&regiao="
+    },
+    {
+      "name": "Contratar um show",
+      "url": "/#orcamento"
+    },
+    {
+      "name": "Instagram oficial",
+      "url": "/#presenca"
+    }
+  ]
+}

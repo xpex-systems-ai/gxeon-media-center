@@ -104,3 +104,5 @@
 :root { --brand: #f3151a; --primary:#f3151a; --ring:#f3151a; --border:rgba(243,21,26,.27); --input:rgba(243,21,26,.34); --gradient-hero: linear-gradient(90deg,rgba(8,9,12,.88),rgba(8,9,12,.48)),linear-gradient(0deg,#08090c,transparent 75%); }
 .logo-surra {display:inline-flex;align-items:center;gap:.65rem;font-family:Georgia,serif;font-weight:900;font-size:1.15rem;line-height:1;text-transform:uppercase;letter-spacing:-.03em}
 .logo-surra img {width:44px;height:44px;object-fit:contain}
+
+@media (display-mode: standalone) { body { padding-bottom: env(safe-area-inset-bottom); } }

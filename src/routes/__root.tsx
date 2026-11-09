@@ -81,6 +81,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#0b0e12" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "application-name", content: "Surra de Pagode" },
       { title: "Surra de Pagode — Booking" },
       { name: "description", content: "Contratação de shows de samba e pagode em Brasília." },
       { property: "og:site_name", content: "Surra de Pagode — Booking" },
@@ -95,7 +99,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/surra-logo.svg", type: "image/svg+xml" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/surra-logo.svg" },
     ],
   }),
   shellComponent: RootShell,
@@ -124,7 +130,18 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <PwaRegistration />
       <Outlet />
     </QueryClientProvider>
   );
+}
+function PwaRegistration() {
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    const onLoad = () => { navigator.serviceWorker.register("/sw.js").catch(() => {}); };
+    if (document.readyState === "complete") onLoad();
+    else window.addEventListener("load", onLoad, { once: true });
+    return () => window.removeEventListener("load", onLoad);
+  }, []);
+  return null;
 }
