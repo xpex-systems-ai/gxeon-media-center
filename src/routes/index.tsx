@@ -11,7 +11,7 @@ import palco from "@/assets/palco-instrumentos.svg";
 const IG = "https://www.instagram.com/surradepagode/";
 const IG_DM = "https://ig.me/m/surradepagode";
 const JBR = "https://jornaldebrasilia.com.br/viva/eventos/novos-projetos-fazem-as-segundas-perderem-a-fama-de-pior-dia-da-semana/";
-const REEL = "https://www.instagram.com/reel/DdjsQDnOPmr/";
+const REEL = "https://www.instagram.com/reel/DfVdwHJOp_n/";
 const VIBE = "https://www.vibeindex.com.br/event/brasilia-df-tchau-e-benca-6-de-novembro-nov-07-2026";
 // Preencher somente após o grupo informar o WhatsApp comercial oficial (apenas dígitos, com DDI).
 const WHATSAPP_OFICIAL = "";
@@ -156,7 +156,7 @@ function Index() {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <a href={REEL} target="_blank" rel="noopener noreferrer" className="group flex aspect-[4/5] flex-col justify-end border-2 border-brand bg-card p-6 transition hover:bg-muted">
               <span className="eyebrow">Reel no Instagram</span>
-              <span className="mt-2 font-display text-2xl">Roda de pagode ao vivo</span>
+              <span className="mt-2 font-display text-2xl">Vídeo em destaque · Surra de Pagode</span>
               <span className="mt-4 btn-brand self-start !py-2 text-sm">Assistir no Instagram ↗</span>
             </a>
             {[2, 3].map((n) => (
