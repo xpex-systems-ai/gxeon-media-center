@@ -232,7 +232,7 @@ function SambaYoutubeLibrary() {
       <button type="submit" className="btn-brand mt-3 !py-2 text-sm">▶ Assistir aqui no aplicativo</button>
       {manualError && <p role="alert" className="mt-2 text-sm text-red-500">{manualError}</p>}
       <p className="mt-2 text-xs text-muted-foreground">Links adicionados manualmente não passam pela curadoria de gênero. O player segue as permissões oficiais do YouTube.</p>
-    </form>}
+    </form>
     {selectedId && configured === false && <div className="mt-5 overflow-hidden rounded-lg border border-brand/30 bg-card">
       <div className="aspect-video"><iframe key={selectedId} className="h-full w-full" src={"https://www.youtube-nocookie.com/embed/" + selectedId + "?autoplay=1"} title="Vídeo YouTube incorporado" allow="autoplay; encrypted-media; picture-in-picture" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen /></div>
     </div>}
